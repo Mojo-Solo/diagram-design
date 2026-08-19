@@ -63,8 +63,8 @@ Node names shrink relative to the canvas as it grows — resist that. Scale the 
 
 | Role | standard | presentation | print |
 |---|---|---|---|
-| Title (Instrument Serif) | 28 | 40 | 32 |
-| Node name (Geist 600) | 12 | 16 | 12 |
+| Title (Libre Baskerville) | 28 | 40 | 32 |
+| Node name (Instrument Sans 500) | 12 | 16 | 12 |
 | Sublabel (Geist Mono) | 9 | 12 | 9 |
 | Arrow label (Geist Mono) | 8 | 12 | 8 |
 | Eyebrow / tag (Geist Mono) | 8 | 8 | 8 |

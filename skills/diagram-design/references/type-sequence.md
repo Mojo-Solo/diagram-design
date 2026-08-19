@@ -115,7 +115,7 @@ If you exceed, split: overview (happy path) + detail (failure / refresh path).
 - Swimlane-style lanes instead of lifelines (different grammar).
 - Drawing `if/else` as two free-floating arrow clusters with **no** fragment frame.
 - Nested `alt` inside `alt` (split into two diagrams).
-- Fragment operator label in Geist sans — must be mono: `ALT` / `OPT` / `LOOP`.
+- Fragment operator label in Instrument Sans — must be mono: `ALT` / `OPT` / `LOOP`.
 - Coral on both `alt` branches.
 - Frame that covers actors with no messages inside the fragment.
 - Filled arrowhead on async fire-and-forget (use open marker).

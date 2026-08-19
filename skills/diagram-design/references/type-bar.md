@@ -10,7 +10,7 @@
 - **Bar width:** ≥ 50% of the column pitch (the gap should never exceed the bar). Typical: pitch=110px, bar=72px.
 - **Y-axis gridlines:** 4–6 horizontal lines at regular intervals. Stroke `rgba(45,49,66,0.08)` (very faint), 0.8px. X-axis baseline at `rgba(45,49,66,0.25)`, 1px.
 - **Y-axis labels:** right-aligned Geist Mono 8px muted, at x=72 (8px left of the plot area).
-- **X-axis labels:** centered below each bar, Geist sans 11px 600 for category names.
+- **X-axis labels:** centered below each bar, Instrument Sans 11px 600 for category names.
 - **Value labels:** Geist Mono 8px above each bar. Focal bar label in accent; others in muted.
 - **Focal bar:** 1 bar max in accent fill/stroke. All others in `muted @ 0.15` fill + `muted` stroke.
 - **Y-axis line:** thin vertical `<line>` at x=80 from y=40 to y=420.

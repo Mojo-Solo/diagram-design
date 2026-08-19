@@ -2,7 +2,7 @@
 
 **The single source of truth for colors, typography, and tokens.** Every diagram draws from this — not from hex values inlined in other reference files. If you want to change the visual skin of Diagram Design, change this file.
 
-Default skin is a cool editorial palette — white-smoke paper, jet-black ink, atomic-tangerine accent, blue-slate muted. It's designed to look good out of the box; swap these values (or run [`onboarding.md`](onboarding.md)) and every new diagram inherits the new skin without touching any type-specific logic.
+Active skin is the **Public Voyani visual system** — warm green field paper, dark ink, Voyani coral accent, grey/brown muted. Swap these values (or run [`onboarding.md`](onboarding.md)) and every new diagram inherits the new skin without touching any type-specific logic. The pristine shipped skin is recoverable at `~/.diagram-design/profiles/default.md`.
 
 To generate your own from a website URL, see [`onboarding.md`](onboarding.md).
 
@@ -16,24 +16,27 @@ Every token is referred to by **semantic role**, not by its hex value. Type refe
 
 | Role | Purpose | Default (light) | Default (dark) |
 |---|---|---|---|
-| `paper` | Page background, default node fill | `#f5f5f5` (white-smoke) | `#2d3142` (jet-black) |
-| `paper-2` | Diagram container bg, secondary fill | `#ececec` | `#393e53` |
-| `ink` | Primary text, primary stroke | `#2d3142` (jet-black) | `#f5f5f5` (white-smoke) |
-| `muted` | Secondary text, default arrow stroke | `#4f5d75` (blue-slate) | `#bfc0c0` (silver) |
-| `soft` | Sublabels, boundary labels | `#7a8399` | `#8e98ac` |
-| `rule` | Hairline borders | `rgba(45,49,66,0.12)` | `rgba(245,245,245,0.12)` |
-| `rule-solid` | Stronger borders, baselines | `#bfc0c0` (silver) | `rgba(191,192,192,0.25)` |
-| `accent` | Focal / 1–2 max per diagram | `#eb6c36` (atomic-tangerine) | `#f08a59` |
-| `accent-tint` | Fill for accent-bordered boxes | `rgba(235,108,54,0.08)` | `rgba(240,138,89,0.10)` |
-| `link` | HTTP/API calls, external arrows | `#2e5aa8` | `#6a95d8` |
+| `paper` | Page background, default node fill | `#EBF5DF` (warm green field) | `#2B2C2C` (dark ink) |
+| `paper-2` | Diagram container bg, secondary fill | `#FFFDF7` (paper card) | `#3E3A37` |
+| `ink` | Primary text, primary stroke | `#2B2C2C` (dark ink) | `#FFFFFF` |
+| `muted` | Secondary text, default arrow stroke | `#5C5E5E` (grey.dark) | `#B0B8A7` (green.dark) |
+| `soft` | Sublabels, boundary labels | `#847D76` (brown.dark) | `#847D76` |
+| `rule` | Hairline borders | `rgba(43,44,44,0.12)` | `rgba(255,255,255,0.12)` |
+| `rule-solid` | Stronger borders, baselines | `#B0A79D` (brown.normal) | `#5C5E5E` |
+| `accent` | Focal / 1–2 max per diagram | `#EF6340` (Voyani coral) | `#EF6340` (Voyani coral) |
+| `accent-tint` | Fill for accent-bordered boxes | `rgba(239,99,64,0.08)` | `rgba(239,99,64,0.12)` |
+| `accent-thin` | Thin accent strokes, accent-colored text | `#B34A30` (tomato.dark) | `#EF6340` |
+| `link` | HTTP/API calls, external arrows | `#4D7FAA` (signal blue) | `#7FA9CC` |
 
-> **Brand palette source:** this skin maps to a five-color brand palette — `jet-black #2d3142`, `silver #bfc0c0`, `white-smoke #f5f5f5`, `atomic-tangerine #eb6c36`, `blue-slate #4f5d75`. The `soft`, `rule`, and `link` tokens are derived (lighter slate, ink-at-opacity, and a saturated variant in the blue-slate hue family) to cover roles the brand palette doesn't name directly.
+> **Brand palette source:** Public Voyani visual system, extracted from the governed brand pack (`~/.claude/skills/voyani/reference/approved-pack.json`, canonical `Mojo-Solo/standard-brand` → `brand.voyani.yaml`). Palette families: `tomato #EF6340`, `brown #B0A79D`, `grey #7A7D7D`, `yellow #F7F391`, `blue #DFF5F3`, `green #EBF5DF`. `muted`, `soft`, `rule-solid` and `accent-thin` are drawn from those families' `dark`/`normal` steps rather than invented, so every token here is a Voyani color. `link` uses Voyani's semantic signal blue.
+
+> **Contrast notes (light):** `ink` 12.44:1, `muted` 5.80:1, `accent-thin` 4.74:1 — all AA. `accent #EF6340` is 2.86:1 on `paper`, marginally under the 3.0:1 graphic threshold; it is kept because Voyani coral is load-bearing brand heat. Use `accent-thin #B34A30` for hairline accent strokes and accent-colored text; reserve `accent` for fills and large marks. Dark mode: `ink` 14.01:1, `muted` 6.84:1, `accent` 4.35:1 — all pass.
 
 > **Note:** The pre-baked example HTML files in `assets/` were built under an earlier skin. Regenerating them against the current `style-guide.md` is a v5.1 task. New diagrams the skill produces will use the tokens above.
 
 ### Inversion rule (light → dark)
 
-Any `rgba(28,25,23, X)` in light becomes `rgba(250,247,242, X)` in dark. Same opacities, RGB flipped. The accent gets a slight hue-shift brighter to read on dark paper.
+Voyani ships a **real dark palette**, so the dark column above is Voyani's own dark set — not a mechanical inversion. Do not derive dark values by flipping light ones. For any token not listed, `rgba(43,44,44, X)` in light becomes `rgba(255,255,255, X)` in dark at the same opacity. The accent does **not** hue-shift: `#EF6340` is the accent in both modes and already clears AA on dark paper (4.35:1).
 
 ### Series palette (multi-series chart types only)
 
@@ -73,20 +76,22 @@ A self-contained palette for the terminal-window primitive (see [primitive-termi
 
 | Role | Family | Size | Weight | Usage |
 |---|---|---|---|---|
-| `title` | Instrument Serif | 1.75rem | 400 | Page H1 |
-| `node-name` | Geist (sans) | 12px | 600 | Human-readable labels |
+| `title` | Libre Baskerville | 1.75rem | 400 | Page H1 |
+| `node-name` | Instrument Sans | 12px | 500 | Human-readable labels |
 | `sublabel` | Geist Mono | 9px | 400 | Port, protocol, URL, field type |
 | `eyebrow` | Geist Mono | 7–8px | 500, tracked 0.18em, uppercase | Type tags, axis labels |
 | `arrow-label` | Geist Mono | 8px | 400, tracked 0.06em | Arrow annotations |
-| `callout` | Instrument Serif *italic* | 14px | 400 | Editorial asides only |
+| `callout` | Libre Baskerville *italic* | 14px | 400 | Editorial asides only |
 
 ### Font stack
 
 ```html
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Instrument+Sans:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 ```
 
-**Load-bearing rule:** Mono is for *technical* content (ports, commands, URLs, field types). Names go in Geist sans. Page title is Instrument Serif. Italic Instrument Serif is reserved for annotation callouts (see [primitive-annotation.md](primitive-annotation.md)). **Never JetBrains Mono** as a blanket "dev" font.
+**Voyani weight cap:** never exceed weight 500 on quiet surfaces. `node-name` is 500, not 600. Libre Baskerville 700 is available but reserved for a page H1 that genuinely needs it.
+
+**Load-bearing rule:** Mono is for *technical* content (ports, commands, URLs, field types). Names go in Instrument Sans. Page title is Libre Baskerville. Italic Libre Baskerville is reserved for annotation callouts (see [primitive-annotation.md](primitive-annotation.md)). **Never JetBrains Mono** as a blanket "dev" font.
 
 ---
 
@@ -134,7 +139,7 @@ Four options:
 - **Contrast**: `ink` must hit WCAG AA on `paper`. `muted` must hit AA on `paper` for 11px+ text.
 - **One accent**: pick one color for `accent`. Two accents erases the focal signal.
 - **No rainbow palette**: if your brand ships 8 colors, pick 3 (paper, ink, accent). The rest become `muted` variants.
-- **Serif + sans + mono**: three families, not more. If brand typography is all sans, keep Instrument Serif for `title` and `callout` anyway — the contrast is load-bearing.
+- **Serif + sans + mono**: three families, not more. Voyani supplies all three (Libre Baskerville / Instrument Sans / Geist Mono), so no substitution is needed — the serif/sans contrast is load-bearing and already brand-true.
 - **Paper is warm-neutral, not pure white**: pure white turns the design sterile. Pick a cream, bone, or light grey with a hint of warmth.
 - **Dot pattern is optional, not default**: the 22×22 dot pattern is an opt-in "dotted paper" variant (good for long-form editorial hero diagrams). The default background is a clean `paper` fill, no pattern. When the pattern is enabled, it should sit at ~10% opacity of `ink` on `paper` — visible but quiet.
 - **Container is clean by default**: the diagram sits directly on the page paper, no secondary container background or border. A framed variant (`paper-2` bg + `rule` border + 8px radius + padding) is available as an opt-in for card-heavy layouts, but don't reach for it by default — the extra chrome fights the figure.

@@ -22,9 +22,9 @@ Don't silently ship default-skinned diagrams into a branded project.
 
 First check the project root for a `.diagram-design` marker and resolve it per [`references/profiles.md`](references/profiles.md). A valid marker whose profile exists selects that file directly and skips this gate; `profile: default` also skips it. A malformed or missing-profile marker follows the visible failure handling in that reference. Never copy a marker-selected profile over the installed working copy.
 
-Open [`references/style-guide.md`](references/style-guide.md) and check the default tokens. If they're still the shipped defaults (paper `#f5f5f5`, ink `#2d3142`, accent `#eb6c36` atomic-tangerine), **pause and ask the user**:
+Open [`references/style-guide.md`](references/style-guide.md) and check the default tokens. If they're still the shipped defaults (paper `#f5f5f5`, ink `#2d3142`, accent `#eb6c36` Voyani coral), **pause and ask the user**:
 
-> *"This is your first diagram in this project. The style guide is still at the default (neutral white-smoke + atomic-tangerine). Do you want to customize it to match your brand first? Options: (a) pull from your website URL, (b) extract from an installed skill, (c) extract from a local folder / design-system directory, (d) paste tokens manually, (e) proceed with the default for now, (f) load a saved client profile."*
+> *"This is your first diagram in this project. The style guide is still at the default (neutral white-smoke + Voyani coral). Do you want to customize it to match your brand first? Options: (a) pull from your website URL, (b) extract from an installed skill, (c) extract from a local folder / design-system directory, (d) paste tokens manually, (e) proceed with the default for now, (f) load a saved client profile."*
 
 Then branch per the matching section of [`references/onboarding.md`](references/onboarding.md); for **(f)** follow [`references/profiles.md`](references/profiles.md).
 
@@ -132,7 +132,7 @@ These mark "AI slop" schematics of any type:
 | Anti-pattern | Why it fails |
 |---|---|
 | Dark mode + cyan/purple glow | Looks "technical" without design decisions |
-| JetBrains Mono as blanket "dev" font | Mono is for *technical* content — ports, commands, URLs. Names go in Geist sans. |
+| JetBrains Mono as blanket "dev" font | Mono is for *technical* content — ports, commands, URLs. Names go in Instrument Sans. |
 | Identical boxes for every node | Erases hierarchy |
 | Legend floating inside the diagram area | Collides with nodes |
 | Arrow labels with no masking rect | Bleeds through the line |
@@ -155,7 +155,7 @@ Type-specific anti-patterns live in each `references/type-*.md`.
 
 ## 5. Design System
 
-**The design system is skinnable.** All colors, typography, and tokens live in a single source of truth — [`references/style-guide.md`](references/style-guide.md). This file describes semantic roles (`paper`, `ink`, `muted`, `accent`, `link`, …). The default skin is a cool editorial palette (white-smoke paper, jet-black ink, atomic-tangerine accent, blue-slate muted, silver hairlines); to apply your own brand, either edit `style-guide.md` directly or run the URL-based flow described in [`references/onboarding.md`](references/onboarding.md).
+**The design system is skinnable.** All colors, typography, and tokens live in a single source of truth — [`references/style-guide.md`](references/style-guide.md). This file describes semantic roles (`paper`, `ink`, `muted`, `accent`, `link`, …). The default skin is a cool editorial palette (white-smoke paper, jet-black ink, Voyani coral accent, blue-slate muted, silver hairlines); to apply your own brand, either edit `style-guide.md` directly or run the URL-based flow described in [`references/onboarding.md`](references/onboarding.md).
 
 > When specs below or in type references mention "ink", "accent", "muted", etc., look up the current hex value in `style-guide.md`.
 
@@ -186,14 +186,14 @@ Type-specific anti-patterns live in each `references/type-*.md`.
 
 ### Typography (summary — full spec in style-guide.md)
 
-- **Title** — Instrument Serif, 1.75rem, 400 — H1 only
-- **Node name** — Geist (sans), 12px, 600 — human-readable labels
+- **Title** — Libre Baskerville, 1.75rem, 400 — H1 only
+- **Node name** — Instrument Sans, 12px, 600 — human-readable labels
 - **Sublabel** — Geist Mono, 9px — ports, URLs, field types
 - **Eyebrow / tag** — Geist Mono, 7–8px, uppercase, tracked — type tags, axis labels
 - **Arrow label** — Geist Mono, 8px — annotation on arrows
-- **Editorial aside** — Instrument Serif *italic*, 14px — callouts only
+- **Editorial aside** — Libre Baskerville *italic*, 14px — callouts only
 
-**Mono is for technical content.** Names are Geist sans. Page title is Instrument Serif. Italic Instrument Serif is reserved for annotation callouts. Never JetBrains Mono as a blanket "dev" font.
+**Mono is for technical content.** Names are Instrument Sans. Page title is Libre Baskerville. Italic Libre Baskerville is reserved for annotation callouts. Never JetBrains Mono as a blanket "dev" font.
 
 ```html
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -293,7 +293,7 @@ These six rules are **non-negotiable**. Run the pre-output checklist (§9) to ve
 <rect x="X+8" y="Y+6" width="28" height="12" rx="2" fill="transparent" stroke="STROKE@0.40" stroke-width="0.8"/>
 <text x="X+22" y="Y+15" fill="STROKE@0.8" font-size="7" font-family="'Geist Mono', monospace"
       text-anchor="middle" letter-spacing="0.08em">API</text>
-<!-- 4. Node name (Geist sans — human-readable) -->
+<!-- 4. Node name (Instrument Sans — human-readable) -->
 <text x="CX" y="CY+2" fill="#2d3142" font-size="12" font-weight="600"
       font-family="'Geist', sans-serif" text-anchor="middle">Node Name</text>
 <!-- 5. Technical sublabel (Geist Mono) -->
@@ -390,7 +390,7 @@ If you exceed, split into two diagrams (overview + detail).
 
 ### Page layout
 
-1. **Header** — eyebrow (Geist Mono), title (Instrument Serif), optional subtitle (Geist muted).
+1. **Header** — eyebrow (Geist Mono), title (Libre Baskerville), optional subtitle (Geist muted).
 2. **Diagram container** — default: **clean, borderless**, no background — the SVG sits directly on the page paper. Optional *framed* variant (for card-heavy layouts or hero placements): `paper-2` bg + 1px `rule` border + 8px radius + `1.5rem` padding + `overflow-x: auto`.
 3. **Summary cards** — 2–3 col grid with *varied* widths (e.g., `1.1fr 1fr 0.9fr`).
 4. **Footer** — colophon in Geist Mono, muted, hairline top border.
@@ -472,10 +472,10 @@ Run before producing any diagram.
 **Typography:**
 
 - [ ] Brand match uses exact public families/weights, verified via `getComputedStyle`; fallbacks disclosed?
-- [ ] Human-readable names in Geist sans, not Geist Mono?
+- [ ] Human-readable names in Instrument Sans, not Geist Mono?
 - [ ] Technical sublabels (ports, commands, URLs) in Geist Mono?
-- [ ] Page title in Instrument Serif?
-- [ ] Annotation callouts (if any) in *italic* Instrument Serif? (see [primitive-annotation.md](references/primitive-annotation.md))
+- [ ] Page title in Libre Baskerville?
+- [ ] Annotation callouts (if any) in *italic* Libre Baskerville? (see [primitive-annotation.md](references/primitive-annotation.md))
 - [ ] No JetBrains Mono anywhere?
 
 ---

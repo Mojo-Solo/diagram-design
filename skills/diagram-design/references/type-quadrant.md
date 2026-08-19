@@ -25,7 +25,7 @@
 
 ## Consultant special (2×2 scenario matrix)
 
-A **layout variant** of the standard quadrant — same house skin (warm paper, dot pattern, Instrument Serif title, Geist mono eyebrows, coral focal rule). The grammar shifts: axes hold a **range** rather than a measurement; cells hold **named scenarios** rather than positioned items.
+A **layout variant** of the standard quadrant — same house skin (warm paper, dot pattern, Libre Baskerville title, Geist mono eyebrows, coral focal rule). The grammar shifts: axes hold a **range** rather than a measurement; cells hold **named scenarios** rather than positioned items.
 
 **Use when:** you're framing four futures, archetypes, or strategic options across two independent drivers — classic scenario planning, positioning frames, or 2×2 strategy decks (BCG/McKinsey territory). The reader should come away with four named bets, not a point cloud.
 
@@ -52,8 +52,8 @@ Everything else — paper, dot pattern, typography, legend strip, 4px grid, comp
 - **Focal quadrant tint**: `rgba(235,108,54,0.04)` full rect behind the focal cell.
 - **Focal cell**: `accent-tint` fill, `accent` stroke at 1.2px. Corner tag in `accent`, weight 600.
 - **Non-focal cells**: `store` treatment (`ink @ 0.04` fill, `muted @ 0.28` stroke).
-- **Cell title**: Geist sans, 16px, weight 600, `ink`.
-- **Cell description**: Geist sans, 11px, `muted`, 1–3 lines, left-aligned inside the cell.
+- **Cell title**: Instrument Sans, 16px, weight 600, `ink`.
+- **Cell description**: Instrument Sans, 11px, `muted`, 1–3 lines, left-aligned inside the cell.
 - **Corner tag**: Geist Mono, 8px, uppercase, tracked `0.18em`, `muted` (or `accent` on focal). Format: `NN · DIMENSION-A / DIMENSION-B` — the two axis-dimension words must match the axis labels exactly.
 - **Axis labels**: Geist Mono 9px **regular weight** (not bold), tracked `0.18em`, uppercase, `ink`. **One word per tip.** No arrow glyphs in the label, no `HIGH / LOW` parentheticals, no multi-line sublabels. The word itself *is* the label. Position labels *beyond* the arrow tips (not on the axis line):
   - Top tip: `text-anchor="middle"`, ~12px above the arrow tip
@@ -72,7 +72,7 @@ Everything else — paper, dot pattern, typography, legend strip, 4px grid, comp
 ### Anti-patterns (variant-specific)
 
 - Plain white background — the warm paper + dot pattern is load-bearing across the skill; dropping it to "look consultant" turns the diagram generic.
-- Sans-serif H1 — keep Instrument Serif for the page title. The title/diagram contrast is the house signature.
+- Sans-serif H1 — keep Libre Baskerville for the page title. The title/diagram contrast is the house signature.
 - Unnamed cells ("Scenario 1/2/3/4") in a shipped diagram — OK as a blank template; not OK as a finished artifact.
 - Coral on more than one cell — same focal rule as everywhere else in the skill.
 - 3×3 or 2×3 grids — those are different diagrams, not this variant.
