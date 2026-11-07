@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MojoLife · 7-Screen CoThinker Hub State & Backend Wiring Map</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --paper: #faf7f2;
+      --paper-2: #f1ece4;
+      --card: #ffffff;
+      --ink: #16273b;
+      --muted: #5c6672;
+      --soft: #8d97a2;
+      --rule: #e2dcd2;
+      --act: #006da4;
+      --act-faint: #e3eef5;
+      --live: #00a9e0;
+      --rec: #c7261c;
+      --rec-faint: #f8e4e1;
+      --ok: #2e7d4f;
+      --amber: #b7791f;
+      --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+      --motion-fast: 160ms;
+      --motion-step: 480ms;
+      --motion-hold: 900ms;
+      --motion-total: 4500ms;
+      --motion-ease: cubic-bezier(.16,1,.3,1);
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 36px 48px;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+    }
+    [data-motion-root], .static-root {
+      width: min(100%, 1320px);
+      margin: 0 auto;
+    }
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 16px;
+    }
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--act);
+      font: 600 10px/1.4 var(--mono);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font: 400 clamp(26px, 2.8vw, 38px)/1.08 var(--serif);
+      letter-spacing: -.015em;
+      color: var(--ink);
+    }
+    .lede {
+      max-width: 540px;
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .diagram-wrap {
+      overflow-x: auto;
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(22,39,59,0.06), 0 8px 24px rgba(22,39,59,0.06);
+      padding: 12px;
+    }
+    svg { display: block; width: 100%; min-width: 960px; height: auto; }
+
+    .motion-ready [data-motion-item] {
+      opacity: .14;
+      transform: translateY(6px);
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: opacity var(--motion-step) var(--motion-ease),
+                  transform var(--motion-step) var(--motion-ease);
+    }
+    .motion-ready [data-motion-item].is-visible,
+    .motion-ready[data-frame="end"] [data-motion-item],
+    .motion-ready[data-frame="static"] [data-motion-item] {
+      opacity: 1;
+      transform: none;
+    }
+    .step-focus { fill: transparent; stroke: transparent; stroke-width: 1.5; }
+    .motion-ready [data-motion-item].is-current .step-focus {
+      stroke: var(--live);
+      stroke-dasharray: 5 4;
+    }
+
+    [data-motion-controls] {
+      display: none;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+    }
+    .motion-ready [data-motion-controls] { display: flex; }
+    [data-motion-controls][hidden] { display: none !important; }
+    [data-motion-controls] button {
+      min-width: 44px;
+      min-height: 36px;
+      padding: 6px 14px;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--card);
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+    }
+    [data-motion-controls] button:hover { border-color: var(--act); color: var(--act); }
+    [data-motion-controls] button[aria-pressed="true"] {
+      background: var(--act);
+      color: #ffffff;
+      border-color: var(--act);
+    }
+    [data-motion-controls] button:focus-visible {
+      outline: 2px solid var(--live);
+      outline-offset: 2px;
+    }
+    [data-motion-controls] button:disabled { cursor: not-allowed; opacity: .42; }
+    .keyboard-help {
+      margin-left: 8px;
+      color: var(--muted);
+      font: 500 10px/1.4 var(--mono);
+    }
+    [data-motion-status-visible] {
+      margin-left: auto;
+      color: var(--act);
+      font: 600 11px/1.4 var(--mono);
+    }
+    [data-motion-status] {
+      display: block;
+      margin: 8px 4px 0;
+      color: var(--muted);
+      font: 500 11px/1.4 var(--mono);
+    }
+    noscript p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font: 500 11px/1.4 var(--mono);
+    }
+    html[data-motion="static"] [data-motion-controls],
+    html[data-motion="static"] [data-motion-decorative] { display: none !important; }
+    html[data-motion="static"] [data-motion-item] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+    html[data-motion="step"] [data-motion-controls],
+    html[data-motion="step"] [data-motion-decorative] { display: none !important; }
+    html[data-motion="step"] [data-motion-item] {
+      animation: none !important;
+      transition: none !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+      [data-motion-item] { opacity: 1 !important; transform: none !important; }
+      [data-motion-decorative] { display: none !important; }
+      [data-motion-controls] { display: none !important; }
+    }
+    @media print {
+      body { padding: 0; }
+      [data-motion-controls], [data-motion-decorative] { display: none !important; }
+      [data-motion-item] {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="static-root">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">05 · Architecture &amp; Object Graph · CoThinker Hub.html (All 7 Screens)</p>
+        <h1>How Ian’s 7 &lt;x-dc&gt; screens share objects and bind to Laravel</h1>
+      </div>
+      <p class="lede">In Ian’s rule 8 (“anything that lives in two places is the same element and glides”), one canonical store of people, clients, tasks, docs, and calls powers both the morphing Today stage and the six dedicated study screens.</p>
+    </header>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 1280 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ml-map-title ml-map-desc">
+        <title id="ml-map-title">Ian's 7-Screen CoThinker Hub State and Backend Wiring Map</title>
+        <desc id="ml-map-desc">Architecture map connecting the 7 CoThinker Hub screens to the shared Standup Object Store in the center and the live Laravel and Jev backend services at the bottom.</desc>
+        <rect width="1280" height="680" rx="12" fill="#faf7f2"/>
+
+        <!-- TOP ROW: The 7 <x-dc> Screens -->
+        <text x="40" y="36" fill="#006da4" font-family="'Geist Mono', monospace" font-size="10" font-weight="600" letter-spacing="1.6">LAYER 1 · IAN’S 7 INTERACTIVE &lt;x-dc&gt; SCREENS (dc-runtime.js + React 18)</text>
+
+        <rect x="32" y="52" width="224" height="148" rx="10" fill="#e3eef5" stroke="#006da4" stroke-width="1.6"/>
+        <text x="48" y="76" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">SCREEN 0 · PRIMARY STAGE</text>
+        <text x="48" y="98" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="600">Today (One Page Morphs)</text>
+        <text x="48" y="118" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• 6 in-page places (PLACES[])</text>
+        <text x="48" y="134" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• 9 moments (8:30 → 5:00)</text>
+        <text x="48" y="150" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• #ml-find + #ml-answer</text>
+        <text x="48" y="176" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">GET /today · 1440×900</text>
+
+        <rect x="272" y="52" width="152" height="148" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+        <text x="286" y="76" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">SCREEN 1 · MOBILE</text>
+        <text x="286" y="98" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Phone Thursday</text>
+        <text x="286" y="118" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• Hold-to-talk</text>
+        <text x="286" y="134" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• #mp-q Ask bar</text>
+        <text x="286" y="176" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">GET /phone · 390×844</text>
+
+        <rect x="440" y="52" width="192" height="148" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+        <text x="456" y="76" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">SCREEN 2 · PORTAL</text>
+        <text x="456" y="98" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Brown &amp; Brown Room</text>
+        <text x="456" y="118" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• Front-desk Mojo rig</text>
+        <text x="456" y="134" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• 3 workstreams</text>
+        <text x="456" y="150" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• #ms-ask → pass to Eric</text>
+        <text x="456" y="176" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">GET /client-room</text>
+
+        <rect x="648" y="52" width="144" height="148" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+        <text x="662" y="76" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">SCREEN 3 · INBOX</text>
+        <text x="662" y="98" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">3D Letters</text>
+        <text x="662" y="118" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• Wax seal flip</text>
+        <text x="662" y="134" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• 2 tasks inside</text>
+        <text x="662" y="176" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">GET /inbox</text>
+
+        <rect x="808" y="52" width="144" height="148" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+        <text x="822" y="76" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">SCREEN 4 · TASKS</text>
+        <text x="822" y="98" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Fuller Kanban</text>
+        <text x="822" y="118" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• 8 To do · 6 Doing</text>
+        <text x="822" y="134" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• #mt-ask drawer</text>
+        <text x="822" y="176" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">GET /tasks</text>
+
+        <rect x="968" y="52" width="136" height="148" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+        <text x="982" y="76" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">SCREEN 5 · DOCS</text>
+        <text x="982" y="98" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">5 Manila Folders</text>
+        <text x="982" y="118" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• 14 real files</text>
+        <text x="982" y="134" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• #md-ask drawer</text>
+        <text x="982" y="176" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">GET /docs</text>
+
+        <rect x="1120" y="52" width="128" height="148" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+        <text x="1134" y="76" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">SCREEN 6 · PEOPLE</text>
+        <text x="1134" y="98" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Who to Reach</text>
+        <text x="1134" y="118" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• Ask Zain’s Mojo</text>
+        <text x="1134" y="134" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• #mp-mojoq</text>
+        <text x="1134" y="176" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">GET /people</text>
+
+        <!-- MIDDLE ROW: Shared Canonical Object Store (STORE / OBJ) -->
+        <line x1="144" y1="200" x2="144" y2="256" stroke="#006da4" stroke-width="1.5"/>
+        <line x1="348" y1="200" x2="348" y2="256" stroke="#5c6672" stroke-width="1.2"/>
+        <line x1="536" y1="200" x2="536" y2="256" stroke="#5c6672" stroke-width="1.2"/>
+        <line x1="720" y1="200" x2="720" y2="256" stroke="#5c6672" stroke-width="1.2"/>
+        <line x1="880" y1="200" x2="880" y2="256" stroke="#5c6672" stroke-width="1.2"/>
+        <line x1="1036" y1="200" x2="1036" y2="256" stroke="#5c6672" stroke-width="1.2"/>
+        <line x1="1184" y1="200" x2="1184" y2="256" stroke="#5c6672" stroke-width="1.2"/>
+
+        <rect x="32" y="256" width="1216" height="168" rx="12" fill="#f1ece4" stroke="#16273b" stroke-width="1.4"/>
+        <text x="52" y="282" fill="#16273b" font-family="'Geist Mono', monospace" font-size="10" font-weight="600" letter-spacing="1.6">LAYER 2 · SHARED STANDUP OBJECT GRAPH (mojolife/DATA.md · Oct 26 – Nov 5 Standups)</text>
+
+        <rect x="52" y="298" width="224" height="106" rx="8" fill="#ffffff" stroke="#e2dcd2"/>
+        <text x="68" y="320" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">People (PEOPLE / OBJ[p-*])</text>
+        <text x="68" y="340" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">p-david · p-ian · p-saif</text>
+        <text x="68" y="356" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">p-muaz · p-eric · p-zain (Away)</text>
+        <text x="68" y="372" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9">p-ruth (Ruth Epping · U.S. Bank)</text>
+
+        <rect x="292" y="298" width="224" height="106" rx="8" fill="#ffffff" stroke="#e2dcd2"/>
+        <text x="308" y="320" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">Clients (CLIENTS / OBJ[c-*])</text>
+        <text x="308" y="340" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">c-usb (U.S. Bank · Call 10:00)</text>
+        <text x="308" y="356" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9">c-bb (Brown &amp; Brown · Underway)</text>
+        <text x="308" y="372" fill="#c7261c" font-family="'Geist Mono', monospace" font-size="9">c-hormel (Blocked) · c-tr (TR)</text>
+
+        <rect x="532" y="298" width="240" height="106" rx="8" fill="#ffffff" stroke="#e2dcd2"/>
+        <text x="548" y="320" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">Tasks (PILES / OBJ[t-*])</text>
+        <text x="548" y="340" fill="#c7261c" font-family="'Geist Mono', monospace" font-size="9">t-hormel (Blocked) · t-sam1..3</text>
+        <text x="548" y="356" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">t-ruth · t-video · t-claude · t-flyer</text>
+        <text x="548" y="372" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9">tk-gcal · tk-meetbot (Done)</text>
+
+        <rect x="788" y="298" width="216" height="106" rx="8" fill="#ffffff" stroke="#e2dcd2"/>
+        <text x="804" y="320" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">Docs &amp; Media (FILES[])</text>
+        <text x="804" y="340" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">d-sam · d-slides (Ruth 10:00)</text>
+        <text x="804" y="356" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">d-brief · d-tr-anim · d-mockup</text>
+        <text x="804" y="372" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9">5 Project Manila Folders</text>
+
+        <rect x="1020" y="298" width="208" height="106" rx="8" fill="#ffffff" stroke="#e2dcd2"/>
+        <text x="1036" y="320" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">Calls &amp; Letters (k-* / e-*)</text>
+        <text x="1036" y="340" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">k-oct26..nov5 (5 standups)</text>
+        <text x="1036" y="356" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">e-ruth (Video meeting times)</text>
+        <text x="1036" y="372" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">e-gh (CodeRabbit bundle)</text>
+
+        <!-- BOTTOM ROW: Live Laravel 13 + ConditionalGate + Jev Backend -->
+        <line x1="320" y1="424" x2="320" y2="476" stroke="#006da4" stroke-width="1.8"/>
+        <line x1="640" y1="424" x2="640" y2="476" stroke="#006da4" stroke-width="1.8"/>
+        <line x1="960" y1="424" x2="960" y2="476" stroke="#006da4" stroke-width="1.8"/>
+
+        <rect x="32" y="476" width="1216" height="172" rx="12" fill="#16273b" stroke="#16273b"/>
+        <text x="52" y="504" fill="#5fcbec" font-family="'Geist Mono', monospace" font-size="10" font-weight="600" letter-spacing="1.6">LAYER 3 · LIVE LARAVEL 13 BACKEND SERVICES (:8018 mojojev · :8019 mojomosaic-app · :8020 mosaic-on-modules)</text>
+
+        <rect x="52" y="520" width="372" height="108" rx="8" fill="#0f1922" stroke="#00a9e0"/>
+        <text x="72" y="544" fill="#f3eee4" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">POST /mojolife/ask &amp; POST /checkpoint</text>
+        <text x="72" y="564" fill="#5fcbec" font-family="'Geist Mono', monospace" font-size="9">• Mojo\ConditionalInteraction\Core\Gate (v0.1.0)</text>
+        <text x="72" y="582" fill="#b6b0a4" font-family="'Geist Mono', monospace" font-size="9">• LinearPredictor + WeightModel + BudgetLedger</text>
+        <text x="72" y="600" fill="#9be6b8" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">• Screens out noise ("hi") at 0 Jev tokens</text>
+
+        <rect x="444" y="520" width="392" height="108" rx="8" fill="#0f1922" stroke="#00a9e0"/>
+        <text x="464" y="544" fill="#f3eee4" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">AskMeeting &amp; TypeSafe Jev (jev-1.13.0)</text>
+        <text x="464" y="564" fill="#5fcbec" font-family="'Geist Mono', monospace" font-size="9">• POST /communications/w/{ws}/sources/{src}/ask</text>
+        <text x="464" y="582" fill="#b6b0a4" font-family="'Geist Mono', monospace" font-size="9">• Zain\Jev\Jev::ask() + ValidatedJevTransport</text>
+        <text x="464" y="600" fill="#9be6b8" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">• EvidenceRules::verify() SHA-256 quote check</text>
+
+        <rect x="856" y="520" width="372" height="108" rx="8" fill="#0f1922" stroke="#00a9e0"/>
+        <text x="876" y="544" fill="#f3eee4" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Human Proposals, Finder &amp; Domain Modules</text>
+        <text x="876" y="564" fill="#5fcbec" font-family="'Geist Mono', monospace" font-size="9">• POST /checkpoint/proposals/{proposal}/approve</text>
+        <text x="876" y="582" fill="#b6b0a4" font-family="'Geist Mono', monospace" font-size="9">• GET /find?q=… (Finder across Tasks/People/Pages)</text>
+        <text x="876" y="600" fill="#9be6b8" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">• mojo-modules/{core,groups,email,media,memory}</text>
+      </svg>
+    </div>
+  </main>
+</body>
+</html>

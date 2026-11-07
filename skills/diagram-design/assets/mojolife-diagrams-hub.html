@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MojoLife · Comprehensive Workflow &amp; Cherry-Pick Diagrams Hub</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #faf7f2;
+      --paper-2: #f1ece4;
+      --card: #ffffff;
+      --ink: #16273b;
+      --muted: #5c6672;
+      --rule: #e2dcd2;
+      --act: #006da4;
+      --act-faint: #e3eef5;
+      --live: #00a9e0;
+      --ok: #2e7d4f;
+      --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    html, body { height: 100%; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    body { display: flex; flex-direction: column; overflow: hidden; }
+    .topbar {
+      padding: 14px 28px 12px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-family: var(--serif);
+      font-size: 26px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--act-faint);
+      color: var(--act);
+      font: 600 11px/1.3 var(--mono);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill-link {
+      text-decoration: none;
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      transition: all .15s ease;
+    }
+    .pill-link:hover, .pill-link.primary {
+      background: var(--act);
+      color: #ffffff;
+      border-color: var(--act);
+    }
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      border-radius: 999px;
+      background: var(--paper-2);
+      width: fit-content;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font: 600 13px/1.2 var(--sans);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s ease;
+    }
+    .tab:hover { color: var(--ink); }
+    .tab.active {
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(22,39,59,0.08);
+    }
+    .tab .num {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--act);
+      margin-right: 6px;
+    }
+    main {
+      flex: 1 1 auto;
+      position: relative;
+      background: var(--paper);
+      overflow: hidden;
+    }
+    iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: var(--paper);
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-row">
+      <div class="brand">
+        <svg width="26" height="26" viewBox="69 69 200 200" aria-hidden="true" style="color: var(--ink)"><path d="M192.72,245.7l-20.99-152.9-62.99-.09c-5.05,0-9.74,4.11-10.42,9.1l-19.72,143.63h41.86s15.12-110.15,15.12-110.15l15.01,110.15h42.13Z" fill="#2FA9DE"></path><circle cx="151.14" cy="68.9" r="14.85" fill="#ffc21a"></circle></svg>
+        <h1>MojoLife · Architecture, Information Flow &amp; Cherry-Pick Diagrams</h1>
+        <span class="badge">● Mojo-Solo/diagram-design · MojoLife Skin</span>
+      </div>
+      <div class="nav-actions">
+        <a class="pill-link primary" href="/today">← Back to MojoLife Today</a>
+        <a class="pill-link" href="/client-room">Client Room</a>
+        <a class="pill-link" href="/inbox">Inbox</a>
+        <a class="pill-link" href="/tasks">Tasks</a>
+        <a class="pill-link" href="/docs">Docs</a>
+        <a class="pill-link" href="/people">People</a>
+        <a class="pill-link" href="/hub">7-Up CoThinker Hub</a>
+        <a class="pill-link" id="open-raw" href="/mojolife-assets/mojolife-01-information-flow.html" target="_blank" rel="noopener">Open Diagram Raw ↗</a>
+      </div>
+    </div>
+
+    <div class="tabs" id="diagram-tabs" role="tablist" aria-label="MojoLife Workflow Diagrams">
+      <button class="tab active" data-src="/mojolife-assets/mojolife-01-information-flow.html" role="tab" aria-selected="true">
+        <span class="num">01</span>End-to-End Information Flow (Animated)
+      </button>
+      <button class="tab" data-src="/mojolife-assets/mojolife-02-conditional-gate-trace.html" role="tab" aria-selected="false">
+        <span class="num">02</span>Conditional Gate Divergence (Animated)
+      </button>
+      <button class="tab" data-src="/mojolife-assets/mojolife-03-cherry-pick-medallion.html" role="tab" aria-selected="false">
+        <span class="num">03</span>148-Repo Cherry-Pick Pipeline (Animated)
+      </button>
+      <button class="tab" data-src="/mojolife-assets/mojolife-04-sequence-lifecycle.html" role="tab" aria-selected="false">
+        <span class="num">04</span>Live Sequence &amp; API Contract
+      </button>
+      <button class="tab" data-src="/mojolife-assets/mojolife-05-screen-state-map.html" role="tab" aria-selected="false">
+        <span class="num">05</span>7-Screen CoThinker Hub Wiring Map
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <iframe id="diagram-frame" src="/mojolife-assets/mojolife-01-information-flow.html" title="MojoLife Diagram Preview"></iframe>
+  </main>
+
+  <script>
+    const tabs = document.querySelectorAll('#diagram-tabs .tab');
+    const frame = document.getElementById('diagram-frame');
+    const openRaw = document.getElementById('open-raw');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        const src = tab.getAttribute('data-src');
+        frame.src = src;
+        openRaw.href = src;
+      });
+    });
+  </script>
+</body>
+</html>

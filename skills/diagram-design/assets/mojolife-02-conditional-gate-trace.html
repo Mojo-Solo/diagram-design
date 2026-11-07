@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MojoLife · Conditional Interaction Gate Policy Trace Divergence</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --paper: #faf7f2;
+      --paper-2: #f1ece4;
+      --card: #ffffff;
+      --ink: #16273b;
+      --muted: #5c6672;
+      --soft: #8d97a2;
+      --rule: #e2dcd2;
+      --act: #006da4;
+      --act-faint: #e3eef5;
+      --live: #00a9e0;
+      --rec: #c7261c;
+      --rec-faint: #f8e4e1;
+      --ok: #2e7d4f;
+      --amber: #b7791f;
+      --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+      --motion-fast: 160ms;
+      --motion-step: 480ms;
+      --motion-hold: 900ms;
+      --motion-total: 4500ms;
+      --motion-ease: cubic-bezier(.16,1,.3,1);
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 36px 48px;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+    }
+    [data-motion-root], .static-root {
+      width: min(100%, 1320px);
+      margin: 0 auto;
+    }
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 16px;
+    }
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--act);
+      font: 600 10px/1.4 var(--mono);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font: 400 clamp(26px, 2.8vw, 38px)/1.08 var(--serif);
+      letter-spacing: -.015em;
+      color: var(--ink);
+    }
+    .lede {
+      max-width: 540px;
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .diagram-wrap {
+      overflow-x: auto;
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(22,39,59,0.06), 0 8px 24px rgba(22,39,59,0.06);
+      padding: 12px;
+    }
+    svg { display: block; width: 100%; min-width: 960px; height: auto; }
+
+    .motion-ready [data-motion-item] {
+      opacity: .14;
+      transform: translateY(6px);
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: opacity var(--motion-step) var(--motion-ease),
+                  transform var(--motion-step) var(--motion-ease);
+    }
+    .motion-ready [data-motion-item].is-visible,
+    .motion-ready[data-frame="end"] [data-motion-item],
+    .motion-ready[data-frame="static"] [data-motion-item] {
+      opacity: 1;
+      transform: none;
+    }
+    .step-focus { fill: transparent; stroke: transparent; stroke-width: 1.5; }
+    .motion-ready [data-motion-item].is-current .step-focus {
+      stroke: var(--live);
+      stroke-dasharray: 5 4;
+    }
+
+    [data-motion-controls] {
+      display: none;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+    }
+    .motion-ready [data-motion-controls] { display: flex; }
+    [data-motion-controls][hidden] { display: none !important; }
+    [data-motion-controls] button {
+      min-width: 44px;
+      min-height: 36px;
+      padding: 6px 14px;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--card);
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+    }
+    [data-motion-controls] button:hover { border-color: var(--act); color: var(--act); }
+    [data-motion-controls] button[aria-pressed="true"] {
+      background: var(--act);
+      color: #ffffff;
+      border-color: var(--act);
+    }
+    [data-motion-controls] button:focus-visible {
+      outline: 2px solid var(--live);
+      outline-offset: 2px;
+    }
+    [data-motion-controls] button:disabled { cursor: not-allowed; opacity: .42; }
+    .keyboard-help {
+      margin-left: 8px;
+      color: var(--muted);
+      font: 500 10px/1.4 var(--mono);
+    }
+    [data-motion-status-visible] {
+      margin-left: auto;
+      color: var(--act);
+      font: 600 11px/1.4 var(--mono);
+    }
+    [data-motion-status] {
+      display: block;
+      margin: 8px 4px 0;
+      color: var(--muted);
+      font: 500 11px/1.4 var(--mono);
+    }
+    noscript p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font: 500 11px/1.4 var(--mono);
+    }
+    html[data-motion="static"] [data-motion-controls],
+    html[data-motion="static"] [data-motion-decorative] { display: none !important; }
+    html[data-motion="static"] [data-motion-item] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+    html[data-motion="step"] [data-motion-controls],
+    html[data-motion="step"] [data-motion-decorative] { display: none !important; }
+    html[data-motion="step"] [data-motion-item] {
+      animation: none !important;
+      transition: none !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+      [data-motion-item] { opacity: 1 !important; transform: none !important; }
+      [data-motion-decorative] { display: none !important; }
+      [data-motion-controls] { display: none !important; }
+    }
+    @media print {
+      body { padding: 0; }
+      [data-motion-controls], [data-motion-decorative] { display: none !important; }
+      [data-motion-item] {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main data-motion-root data-motion-mode="step" data-step-count="5" data-step-current="5" data-frame="static" data-static-frame="complete" tabindex="-1">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">02 · Paired Policy-Evaluation Traces · ConditionalGate v0.1.0 + Jev 1.13.0</p>
+        <h1>Where three live utterances diverge inside the Gate</h1>
+      </div>
+      <p class="lede">Three real requests from our ego-browser verification traverse the same five ordered rules in Checkpoint.php and /mojolife/ask. Explicit states distinguish a rule that fails from downstream Jev rules that are never reached (saving 100% of LLM tokens on noise).</p>
+    </header>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 1240 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ml-trace-title ml-trace-desc">
+        <title id="ml-trace-title">Where three live MojoLife utterances diverge in the Conditional Interaction Gate</title>
+        <desc id="ml-trace-desc">Trace A is a noise greeting hi with utility 0.169 that is suppressed at Rule 3 with zero Jev calls. Trace B is a sam.gov status question with utility 0.852 that passes Jev 1.13.0 choice at P=0.99. Trace C is an actionable task assignment for Sam Member that routes to the tasks module at P=1.00.</desc>
+        <rect width="1240" height="680" rx="12" fill="#faf7f2"/>
+
+        <!-- Vertical trace spines -->
+        <line x1="472" y1="108" x2="472" y2="336" stroke="#c7261c" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="772" y1="108" x2="772" y2="584" stroke="#006da4" stroke-width="1.5"/>
+        <line x1="1072" y1="108" x2="1072" y2="584" stroke="#2e7d4f" stroke-width="1.5"/>
+
+        <!-- Column Headers -->
+        <text x="52" y="72" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="11" font-weight="600" letter-spacing="1.6">ORDERED GATE RULES</text>
+
+        <rect x="352" y="36" width="240" height="68" rx="8" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+        <text x="472" y="62" text-anchor="middle" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Trace A · Noise Utterance</text>
+        <text x="472" y="84" text-anchor="middle" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="11">query: "hi"</text>
+
+        <rect x="652" y="36" width="240" height="68" rx="8" fill="#ffffff" stroke="#006da4" stroke-width="1.5"/>
+        <text x="772" y="62" text-anchor="middle" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Trace B · Standup Question</text>
+        <text x="772" y="84" text-anchor="middle" fill="#006da4" font-family="'Geist Mono', monospace" font-size="11">"What is sam.gov status?"</text>
+
+        <rect x="952" y="36" width="240" height="68" rx="8" fill="#ffffff" stroke="#2e7d4f" stroke-width="1.5"/>
+        <text x="1072" y="62" text-anchor="middle" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Trace C · Actionable Task</text>
+        <text x="1072" y="84" text-anchor="middle" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="11">"Sam, send sam.gov draft Fri"</text>
+
+        <!-- Rule 1 -->
+        <g data-motion-item data-step="1" aria-label="Rule 1: Tenant scope and feature schema validation passes for all three traces">
+          <rect class="step-focus" x="36" y="120" width="1168" height="72" rx="6"/>
+          <text x="52" y="150" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">1 · Scope &amp; Feature Schema</text>
+          <text x="52" y="170" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="10">Scope::tenantId + Canonical::hash</text>
+
+          <rect x="380" y="130" width="184" height="52" rx="6" fill="#ffffff" stroke="#5c6672"/>
+          <text x="472" y="160" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ PASS (scoped)</text>
+
+          <rect x="680" y="130" width="184" height="52" rx="6" fill="#ffffff" stroke="#5c6672"/>
+          <text x="772" y="160" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ PASS (scoped)</text>
+
+          <rect x="980" y="130" width="184" height="52" rx="6" fill="#ffffff" stroke="#5c6672"/>
+          <text x="1072" y="160" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ PASS (scoped)</text>
+        </g>
+
+        <!-- Rule 2 -->
+        <g data-motion-item data-step="2" aria-label="Rule 2: LinearPredictor computes expected utility from work_signal, named_person, and utterance_length_norm">
+          <rect class="step-focus" x="36" y="200" width="1168" height="72" rx="6"/>
+          <text x="52" y="230" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">2 · LinearPredictor Utility</text>
+          <text x="52" y="250" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="10">WeightModel · sigmoid(w·x + b)</text>
+
+          <rect x="380" y="210" width="184" height="52" rx="6" fill="#f1ece4" stroke="#5c6672"/>
+          <text x="472" y="234" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">U = 0.169</text>
+          <text x="472" y="252" text-anchor="middle" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">work=-1 · person=-1</text>
+
+          <rect x="680" y="210" width="184" height="52" rx="6" fill="#e3eef5" stroke="#006da4"/>
+          <text x="772" y="234" text-anchor="middle" fill="#006da4" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">U = 0.852</text>
+          <text x="772" y="252" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">work=+1 · entity=+1</text>
+
+          <rect x="980" y="210" width="184" height="52" rx="6" fill="#e3eef5" stroke="#006da4"/>
+          <text x="1072" y="234" text-anchor="middle" fill="#006da4" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">U = 0.865</text>
+          <text x="1072" y="252" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">work=+1 · person=+1</text>
+        </g>
+
+        <!-- Rule 3: First Divergence -->
+        <g data-motion-item data-step="3" aria-label="Rule 3 is the first divergence: Trace A fails the threshold and is suppressed; Traces B and C are admitted">
+          <rect class="step-focus" x="36" y="280" width="1168" height="84" rx="6"/>
+          <text x="52" y="310" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">3 · Gate::decide(Policy τ=0.55)</text>
+          <text x="52" y="330" fill="#006da4" font-family="'Geist Mono', monospace" font-size="10">FIRST DIVERGENCE POINT</text>
+
+          <rect x="380" y="290" width="184" height="56" rx="6" fill="#f8e4e1" stroke="#c7261c" stroke-width="1.5"/>
+          <text x="472" y="316" text-anchor="middle" fill="#c7261c" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">× SUPPRESSED</text>
+          <text x="472" y="334" text-anchor="middle" fill="#c7261c" font-family="'Geist Mono', monospace" font-size="9">0.169 &lt; 0.45 · 0 Jev calls</text>
+
+          <rect x="680" y="290" width="184" height="56" rx="6" fill="#ffffff" stroke="#006da4" stroke-width="1.4"/>
+          <text x="772" y="316" text-anchor="middle" fill="#006da4" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ ADMITTED</text>
+          <text x="772" y="334" text-anchor="middle" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">reason: admitted</text>
+
+          <rect x="980" y="290" width="184" height="56" rx="6" fill="#ffffff" stroke="#006da4" stroke-width="1.4"/>
+          <text x="1072" y="316" text-anchor="middle" fill="#006da4" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ ADMITTED</text>
+          <text x="1072" y="334" text-anchor="middle" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">reason: admitted</text>
+        </g>
+
+        <!-- Rule 4: TypeSafe Jev 1.13.0 Call -->
+        <g data-motion-item data-step="4" aria-label="Rule 4: TypeSafe Jev 1.13.0 is not reached for Trace A, while Traces B and C execute structured choice judgments">
+          <rect class="step-focus" x="36" y="372" width="1168" height="76" rx="6"/>
+          <text x="52" y="402" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">4 · TypeSafe Jev (jev-1.13.0)</text>
+          <text x="52" y="422" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="10">api.typesafe.ai/v1/systemone</text>
+
+          <rect x="380" y="382" width="184" height="56" rx="6" fill="#faf7f2" stroke="#8d97a2" stroke-dasharray="4 4"/>
+          <text x="472" y="414" text-anchor="middle" fill="#8d97a2" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">○ NOT REACHED</text>
+
+          <rect x="680" y="382" width="184" height="56" rx="6" fill="#e3eef5" stroke="#006da4"/>
+          <text x="772" y="406" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ p_sam (P=0.99)</text>
+          <text x="772" y="424" text-anchor="middle" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9">669 input tokens</text>
+
+          <rect x="980" y="382" width="184" height="56" rx="6" fill="#e3eef5" stroke="#006da4"/>
+          <text x="1072" y="406" text-anchor="middle" fill="#16273b" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ kind=task (P=1.00)</text>
+          <text x="1072" y="424" text-anchor="middle" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9">who=person_2 (Sam)</text>
+        </g>
+
+        <!-- Rule 5: Verification & Final Outcome -->
+        <g data-motion-item data-step="5" aria-label="Rule 5: Evidence verification and final routing outcomes for all three traces">
+          <rect class="step-focus" x="36" y="456" width="1168" height="164" rx="6"/>
+          <text x="52" y="486" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">5 · Evidence &amp; Action Routing</text>
+          <text x="52" y="506" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="10">EvidenceRules + Proposal Store</text>
+
+          <rect x="380" y="466" width="184" height="52" rx="6" fill="#faf7f2" stroke="#8d97a2" stroke-dasharray="4 4"/>
+          <text x="472" y="496" text-anchor="middle" fill="#8d97a2" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">○ NOT REACHED</text>
+
+          <rect x="680" y="466" width="184" height="52" rx="6" fill="#ffffff" stroke="#2e7d4f"/>
+          <text x="772" y="496" text-anchor="middle" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ VERIFIED QUOTE</text>
+
+          <rect x="980" y="466" width="184" height="52" rx="6" fill="#ffffff" stroke="#2e7d4f"/>
+          <text x="1072" y="496" text-anchor="middle" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ VERIFIED TASK</text>
+
+          <!-- Final Outcomes -->
+          <rect x="352" y="540" width="240" height="64" rx="8" fill="#f8e4e1" stroke="#c7261c" stroke-width="1.5"/>
+          <text x="472" y="564" text-anchor="middle" fill="#c7261c" font-family="'Geist Mono', monospace" font-size="10" font-weight="600" letter-spacing="1.2">OUTCOME · DROP</text>
+          <text x="472" y="586" text-anchor="middle" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Screened Out (0 tokens)</text>
+
+          <rect x="652" y="540" width="240" height="64" rx="8" fill="#006da4" stroke="#006da4"/>
+          <text x="772" y="564" text-anchor="middle" fill="#e3eef5" font-family="'Geist Mono', monospace" font-size="10" font-weight="600" letter-spacing="1.2">OUTCOME · ANSWER</text>
+          <text x="772" y="586" text-anchor="middle" fill="#ffffff" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Rendered in #ml-answer</text>
+
+          <rect x="952" y="540" width="240" height="64" rx="8" fill="#16273b" stroke="#16273b"/>
+          <text x="1072" y="564" text-anchor="middle" fill="#5fcbec" font-family="'Geist Mono', monospace" font-size="10" font-weight="600" letter-spacing="1.2">OUTCOME · ROUTE</text>
+          <text x="1072" y="586" text-anchor="middle" fill="#ffffff" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="600">Tasks Module · Assignee #2</text>
+        </g>
+
+        <line x1="52" y1="632" x2="1192" y2="632" stroke="#e2dcd2"/>
+        <text x="52" y="654" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">✓ PASS / ADMITTED</text>
+        <text x="220" y="654" fill="#c7261c" font-family="'Geist Mono', monospace" font-size="11" font-weight="600">× SUPPRESSED (Gate saves Jev call)</text>
+        <text x="520" y="654" fill="#8d97a2" font-family="'Geist Mono', monospace" font-size="11">○ NOT REACHED · downstream LLM call skipped</text>
+      </svg>
+    </div>
+
+    <div data-motion-controls role="group" aria-label="Policy trace playback controls">
+      <button type="button" data-motion-action="prev">Previous</button>
+      <button type="button" data-motion-action="play" aria-pressed="false">Play</button>
+      <button type="button" data-motion-action="pause" aria-pressed="true">Pause</button>
+      <button type="button" data-motion-action="next">Next</button>
+      <button type="button" data-motion-action="replay">Replay</button>
+      <span class="keyboard-help">←/→ step · Space play/pause · R replay · Home/End jump</span>
+      <span data-motion-status-visible aria-hidden="true">Step <span data-motion-step-label>5</span> of 5</span>
+    </div>
+    <span data-motion-status role="status" aria-live="polite" aria-atomic="true">Static frame · all 5 policy evaluation steps visible</span>
+    <noscript><p>Animation controls require JavaScript. The complete 5-rule policy trace is shown above.</p></noscript>
+  </main>
+  <script data-diagram-controls>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const staticOverride = params.get('motion') === 'static' || document.documentElement.dataset.motion === 'static';
+      const requestedStep = params.get('step');
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+      document.fonts.ready.then(() => { document.documentElement.dataset.fontsReady = 'true'; });
+
+      document.querySelectorAll('[data-motion-root]').forEach((root) => {
+        const count = Number(root.dataset.stepCount);
+        const hold = parseFloat(getComputedStyle(root).getPropertyValue('--motion-hold')) || 720;
+        const parsedStep = requestedStep !== null && /^\d+$/.test(requestedStep) ? Number(requestedStep) : null;
+        const exactStep = params.get('motion') === 'step' && Number.isSafeInteger(parsedStep) && parsedStep >= 0 && parsedStep <= count ? parsedStep : null;
+        const items = [...root.querySelectorAll('[data-motion-item]')];
+        const labels = Array.from({ length: count + 1 }, (_, index) => index === 0
+          ? 'Ready'
+          : items.filter((item) => !item.hasAttribute('data-motion-decorative') && Number(item.dataset.step) === index)
+              .map((item) => item.getAttribute('aria-label')).join('; '));
+        const controls = root.querySelector('[data-motion-controls]');
+        const status = root.querySelector('[data-motion-status]');
+        const visibleStep = root.querySelector('[data-motion-step-label]');
+        let step = count;
+        let timer = 0;
+        let playing = false;
+        let stepBeforeReduce = 0;
+        let resumeAfterReduce = root.dataset.motionMode === 'reveal';
+
+        const buttons = (action) => controls.querySelector(`[data-motion-action="${action}"]`);
+        const clearClock = () => { window.clearTimeout(timer); timer = 0; };
+        const announce = () => { status.textContent = `Step ${step} of ${count}: ${labels[step] || 'Complete'}`; };
+        const setControlsAvailable = (available) => {
+          controls.hidden = !available;
+          controls.setAttribute('aria-hidden', String(!available));
+          controls.dataset.playbackDisabled = String(!available);
+          controls.querySelectorAll('button').forEach((control) => { control.disabled = !available; });
+        };
+
+        function render(next, userInitiated = false) {
+          step = Math.max(0, Math.min(count, next));
+          root.dataset.stepCurrent = String(step);
+          root.dataset.frame = step === count ? 'end' : step === 0 ? 'start' : 'step';
+          items.forEach((item) => {
+            const itemStep = Number(item.dataset.step);
+            item.classList.toggle('is-visible', itemStep <= step);
+            item.classList.toggle('is-current', itemStep === step);
+          });
+          if (visibleStep) visibleStep.textContent = String(step);
+          const unavailable = controls.dataset.playbackDisabled === 'true';
+          buttons('prev').disabled = unavailable || step === 0;
+          buttons('next').disabled = unavailable || step === count;
+          if (userInitiated) announce();
+        }
+
+        function pause(userInitiated = false) {
+          clearClock();
+          playing = false;
+          root.classList.remove('is-playing');
+          buttons('play').setAttribute('aria-pressed', 'false');
+          buttons('pause').setAttribute('aria-pressed', 'true');
+          if (userInitiated) status.textContent = `Paused at step ${step} of ${count}`;
+        }
+
+        function finish() {
+          pause(false);
+          root.dataset.frame = 'end';
+          status.textContent = `Complete · step ${count} of ${count}`;
+        }
+
+        function tick() {
+          if (!playing) return;
+          if (step >= count) { finish(); return; }
+          render(step + 1, false);
+          if (step >= count) { finish(); return; }
+          timer = window.setTimeout(tick, hold);
+        }
+
+        function play(fromStart = false, userInitiated = false) {
+          clearClock();
+          if (fromStart || step >= count) render(0, userInitiated);
+          playing = true;
+          root.classList.add('is-playing');
+          buttons('play').setAttribute('aria-pressed', 'true');
+          buttons('pause').setAttribute('aria-pressed', 'false');
+          timer = window.setTimeout(tick, hold);
+        }
+
+        controls.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-motion-action]');
+          if (!button) return;
+          const action = button.dataset.motionAction;
+          if (action === 'play') play(false, true);
+          if (action === 'pause') pause(true);
+          if (action === 'replay') play(true, true);
+          if (action === 'prev') { pause(false); render(step - 1, true); }
+          if (action === 'next') { pause(false); render(step + 1, true); }
+        });
+
+        root.addEventListener('keydown', (event) => {
+          if (event.target.matches('input, textarea, select, a[href]')) return;
+          const keys = { ArrowLeft: step - 1, ArrowRight: step + 1, Home: 0, End: count };
+          if (event.code === 'Space' && !event.target.closest('button')) {
+            event.preventDefault();
+            playing ? pause(true) : play(false, true);
+            return;
+          }
+          if (!event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === 'r') {
+            event.preventDefault();
+            play(true, true);
+            return;
+          }
+          if (!(event.key in keys)) return;
+          event.preventDefault();
+          pause(false);
+          render(keys[event.key], true);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden' && playing) pause(false);
+        });
+        reduce.addEventListener('change', (event) => {
+          if (event.matches && root.dataset.motionState !== 'reduced') {
+            stepBeforeReduce = step;
+            resumeAfterReduce = playing;
+          }
+          pause(false);
+          if (event.matches) {
+            setControlsAvailable(false);
+            render(count, false);
+            root.dataset.frame = 'static';
+            root.dataset.motionState = 'reduced';
+            status.textContent = 'Reduced motion · complete static frame · playback controls unavailable';
+          } else if (staticOverride || root.dataset.motionMode === 'none') {
+            setControlsAvailable(false);
+            render(count, false);
+            root.dataset.frame = 'static';
+            root.dataset.motionState = 'static';
+            status.textContent = 'Static frame · complete diagram · playback controls unavailable';
+          } else {
+            delete root.dataset.motionState;
+            if (exactStep !== null) {
+              setControlsAvailable(false);
+              render(exactStep, false);
+              root.dataset.frame = 'step';
+              root.dataset.motionState = 'test';
+              status.textContent = `Test frame · step ${step} of ${count} · playback controls unavailable`;
+            } else {
+              setControlsAvailable(true);
+              render(stepBeforeReduce, false);
+              status.textContent = `Ready · step ${step} of ${count}`;
+              if (resumeAfterReduce && root.dataset.motionMode === 'reveal') {
+                play(false, false);
+              }
+            }
+            resumeAfterReduce = false;
+          }
+        });
+
+        if (staticOverride) {
+          document.documentElement.dataset.motion = 'static';
+          pause(false);
+          setControlsAvailable(false);
+          render(count, false);
+          root.dataset.frame = 'static';
+          root.dataset.motionState = 'static';
+          status.textContent = 'Static frame · complete diagram · playback controls unavailable';
+        } else if (reduce.matches || root.dataset.motionMode === 'none') {
+          pause(false);
+          setControlsAvailable(false);
+          render(count, false);
+          root.dataset.frame = 'static';
+          root.dataset.motionState = reduce.matches ? 'reduced' : 'static';
+          status.textContent = reduce.matches
+            ? 'Reduced motion · complete static frame · playback controls unavailable'
+            : 'Static frame · complete diagram · playback controls unavailable';
+        } else if (exactStep !== null) {
+          document.documentElement.dataset.motion = 'step';
+          pause(false);
+          setControlsAvailable(false);
+          render(exactStep, false);
+          root.dataset.frame = 'step';
+          root.dataset.motionState = 'test';
+          status.textContent = `Test frame · step ${step} of ${count} · playback controls unavailable`;
+        } else if (root.dataset.motionMode === 'reveal') {
+          setControlsAvailable(true);
+          render(0, false);
+          play(false, false);
+        } else {
+          pause(false);
+          setControlsAvailable(true);
+          render(0, false);
+          status.textContent = `Ready · step 0 of ${count}`;
+        }
+        root.classList.add('motion-ready');
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MojoLife · 148-Repo Cherry-Pick & Consolidation Pipeline</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --paper: #faf7f2;
+      --paper-2: #f1ece4;
+      --card: #ffffff;
+      --ink: #16273b;
+      --muted: #5c6672;
+      --soft: #8d97a2;
+      --rule: #e2dcd2;
+      --act: #006da4;
+      --act-faint: #e3eef5;
+      --live: #00a9e0;
+      --rec: #c7261c;
+      --rec-faint: #f8e4e1;
+      --ok: #2e7d4f;
+      --amber: #b7791f;
+      --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --serif: 'Instrument Serif', serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
+      --motion-fast: 160ms;
+      --motion-step: 480ms;
+      --motion-hold: 900ms;
+      --motion-total: 4500ms;
+      --motion-ease: cubic-bezier(.16,1,.3,1);
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 36px 48px;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+    }
+    [data-motion-root], .static-root {
+      width: min(100%, 1320px);
+      margin: 0 auto;
+    }
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 16px;
+    }
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--act);
+      font: 600 10px/1.4 var(--mono);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font: 400 clamp(26px, 2.8vw, 38px)/1.08 var(--serif);
+      letter-spacing: -.015em;
+      color: var(--ink);
+    }
+    .lede {
+      max-width: 540px;
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .diagram-wrap {
+      overflow-x: auto;
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(22,39,59,0.06), 0 8px 24px rgba(22,39,59,0.06);
+      padding: 12px;
+    }
+    svg { display: block; width: 100%; min-width: 960px; height: auto; }
+
+    .motion-ready [data-motion-item] {
+      opacity: .14;
+      transform: translateY(6px);
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: opacity var(--motion-step) var(--motion-ease),
+                  transform var(--motion-step) var(--motion-ease);
+    }
+    .motion-ready [data-motion-item].is-visible,
+    .motion-ready[data-frame="end"] [data-motion-item],
+    .motion-ready[data-frame="static"] [data-motion-item] {
+      opacity: 1;
+      transform: none;
+    }
+    .step-focus { fill: transparent; stroke: transparent; stroke-width: 1.5; }
+    .motion-ready [data-motion-item].is-current .step-focus {
+      stroke: var(--live);
+      stroke-dasharray: 5 4;
+    }
+
+    [data-motion-controls] {
+      display: none;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+    }
+    .motion-ready [data-motion-controls] { display: flex; }
+    [data-motion-controls][hidden] { display: none !important; }
+    [data-motion-controls] button {
+      min-width: 44px;
+      min-height: 36px;
+      padding: 6px 14px;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--card);
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+    }
+    [data-motion-controls] button:hover { border-color: var(--act); color: var(--act); }
+    [data-motion-controls] button[aria-pressed="true"] {
+      background: var(--act);
+      color: #ffffff;
+      border-color: var(--act);
+    }
+    [data-motion-controls] button:focus-visible {
+      outline: 2px solid var(--live);
+      outline-offset: 2px;
+    }
+    [data-motion-controls] button:disabled { cursor: not-allowed; opacity: .42; }
+    .keyboard-help {
+      margin-left: 8px;
+      color: var(--muted);
+      font: 500 10px/1.4 var(--mono);
+    }
+    [data-motion-status-visible] {
+      margin-left: auto;
+      color: var(--act);
+      font: 600 11px/1.4 var(--mono);
+    }
+    [data-motion-status] {
+      display: block;
+      margin: 8px 4px 0;
+      color: var(--muted);
+      font: 500 11px/1.4 var(--mono);
+    }
+    noscript p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font: 500 11px/1.4 var(--mono);
+    }
+    html[data-motion="static"] [data-motion-controls],
+    html[data-motion="static"] [data-motion-decorative] { display: none !important; }
+    html[data-motion="static"] [data-motion-item] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+      transition: none !important;
+    }
+    html[data-motion="step"] [data-motion-controls],
+    html[data-motion="step"] [data-motion-decorative] { display: none !important; }
+    html[data-motion="step"] [data-motion-item] {
+      animation: none !important;
+      transition: none !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+      [data-motion-item] { opacity: 1 !important; transform: none !important; }
+      [data-motion-decorative] { display: none !important; }
+      [data-motion-controls] { display: none !important; }
+    }
+    @media print {
+      body { padding: 0; }
+      [data-motion-controls], [data-motion-decorative] { display: none !important; }
+      [data-motion-item] {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main data-motion-root data-motion-mode="step" data-step-count="5" data-step-current="5" data-frame="static" data-static-frame="complete" tabindex="-1">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">03 · Medallion Consolidation Pipeline · 148 Repos / 2,545 Census Folders → The One Spine</p>
+        <h1>How we cherry-pick 148 repos into one governed MojoLife platform</h1>
+      </div>
+      <p class="lede">Grounded in FEATURE-MAP.md (2,545 folders / 8,206 PHP classes) and mojo-modules DEC D1–D52: we replace 556 duplicated boilerplate folders with official Spatie packages, refuse copying laravel-base’s 807 Action files, lift only high-value domain services, and skin the entire spine with Ian’s MojoLife CoThinker Hub.</p>
+    </header>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 1280 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ml-cherry-title ml-cherry-desc">
+        <title id="ml-cherry-title">148-Repo Cherry-Pick and Platform One Consolidation Pipeline</title>
+        <desc id="ml-cherry-desc">Five-tier medallion pipeline showing 148 source repos and 2,545 census folders passing through the Spatie install-versus-lift filter into mojo-modules, intelligence packages, and the MojoLife CoThinker Hub frontend.</desc>
+        <defs>
+          <marker id="ml-ch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#006da4"/>
+          </marker>
+        </defs>
+        <rect width="1280" height="680" rx="12" fill="#faf7f2"/>
+
+        <!-- Connectors -->
+        <path d="M256 340 H288" fill="none" stroke="#006da4" stroke-width="1.8" marker-end="url(#ml-ch-arrow)"/>
+        <path d="M520 340 H552" fill="none" stroke="#006da4" stroke-width="1.8" marker-end="url(#ml-ch-arrow)"/>
+        <path d="M784 340 H816" fill="none" stroke="#006da4" stroke-width="1.8" marker-end="url(#ml-ch-arrow)"/>
+        <path d="M1032 340 H1064" fill="none" stroke="#006da4" stroke-width="1.8" marker-end="url(#ml-ch-arrow)"/>
+
+        <!-- Tier 1: Source Portfolio (148 Repos) -->
+        <g data-motion-item data-step="1" aria-label="Step 1: Raw portfolio of 148 active repositories and 2,545 census feature folders across 7 product families">
+          <rect class="step-focus" x="20" y="52" width="240" height="584" rx="10"/>
+          <rect x="28" y="60" width="228" height="568" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.2"/>
+          <text x="44" y="88" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600" letter-spacing="1.4">TIER 01 · RAW PORTFOLIO</text>
+          <text x="44" y="112" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="600">148 Active Repos</text>
+          <text x="44" y="130" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="10">2,545 folders · 8,206 classes</text>
+
+          <rect x="44" y="148" width="196" height="68" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="56" y="168" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">A · Mosaic &amp; Meetings (32)</text>
+          <text x="56" y="186" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">mosaic-app · mojojev ·mojomeet</text>
+          <text x="56" y="202" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">mosaic-truth-pipeline · gbrain</text>
+
+          <rect x="44" y="226" width="196" height="68" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="56" y="246" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">B · ProposalForge &amp; R2A (33)</text>
+          <text x="56" y="264" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">proposal-forge · r2a-* (11)</text>
+          <text x="56" y="280" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">cothinkr-home/PROD · tr-*</text>
+
+          <rect x="44" y="304" width="196" height="68" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="56" y="324" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">C · Benefits &amp; KMSL (13)</text>
+          <text x="56" y="342" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">benefitsbreak-main · kmsl</text>
+          <text x="56" y="358" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">hormel-* · bbd-brain</text>
+
+          <rect x="44" y="382" width="196" height="68" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="56" y="402" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">D · Control &amp; MojoOS (21)</text>
+          <text x="56" y="420" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">github-master · mojo-hub-v2</text>
+          <text x="56" y="436" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">conditional-interaction · fh</text>
+
+          <rect x="44" y="460" width="196" height="68" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="56" y="480" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">E · Media &amp; Verticals (49)</text>
+          <text x="56" y="498" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">mosaic-slides · remotion-player</text>
+          <text x="56" y="514" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">voyani-brain · mojo-media-engine</text>
+
+          <rect x="44" y="540" width="196" height="72" rx="6" fill="#f8e4e1" stroke="#c7261c"/>
+          <text x="56" y="562" fill="#c7261c" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">× Never Copy Whole:</text>
+          <text x="56" y="580" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">laravel-base (807 Actions)</text>
+          <text x="56" y="596" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">mosaic-paperclip (near-clone)</text>
+        </g>
+
+        <!-- Tier 2: The Cherry-Pick Filter (Install vs. Lift) -->
+        <g data-motion-item data-step="2" aria-label="Step 2: The Cherry-Pick Filter replaces 556 platform_base folders with official Spatie packages and lifts only unique domain services">
+          <rect class="step-focus" x="284" y="52" width="240" height="584" rx="10"/>
+          <rect x="292" y="60" width="228" height="568" rx="10" fill="#ffffff" stroke="#006da4" stroke-width="1.4"/>
+          <text x="308" y="88" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9" font-weight="600" letter-spacing="1.4">TIER 02 · CHERRY-PICK GATE</text>
+          <text x="308" y="112" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="600">Install vs. Lift Rules</text>
+          <text x="308" y="130" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="10">FEATURE-MAP.md D1–D14</text>
+
+          <rect x="308" y="148" width="196" height="216" rx="8" fill="#f1ece4" stroke="#d9ccb6"/>
+          <text x="320" y="172" fill="#2e7d4f" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">✓ Install Spatie (556 folders)</text>
+          <text x="320" y="194" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• spatie/laravel-permission</text>
+          <text x="320" y="210" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="8">  (replaces Role in 11 repos)</text>
+          <text x="320" y="228" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• spatie/laravel-activitylog</text>
+          <text x="320" y="244" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="8">  (replaces AuditLog in 15 repos)</text>
+          <text x="320" y="262" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• spatie/laravel-medialibrary</text>
+          <text x="320" y="280" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• spatie/laravel-model-states</text>
+          <text x="320" y="298" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• spatie/laravel-webhook-client</text>
+          <text x="320" y="316" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• spatie/laravel-data + scout</text>
+          <text x="320" y="342" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">47 repos collapsed → 7 pkgs</text>
+
+          <rect x="308" y="380" width="196" height="232" rx="8" fill="#e3eef5" stroke="#006da4"/>
+          <text x="320" y="404" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">★ Cherry-Pick Domain Lifts</text>
+          <text x="320" y="426" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• EngagementRoom (2,632 LOC)</text>
+          <text x="320" y="444" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• TruthIngestion (1,173 LOC)</text>
+          <text x="320" y="462" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• MemoryBriefBuilder (1,363)</text>
+          <text x="320" y="480" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• CoThinkr Sources/Coaching</text>
+          <text x="320" y="498" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• SOQ Bid-Matrix (13,458 LOC)</text>
+          <text x="320" y="516" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• MojoMediaEngine (14,627 LOC)</text>
+          <text x="320" y="534" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">• Voyani Citation Engine</text>
+          <text x="320" y="560" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">Ported into Services/ methods</text>
+        </g>
+
+        <!-- Tier 3: Shared Laravel Module Spine (mojo-modules) -->
+        <g data-motion-item data-step="3" aria-label="Step 3: Shared Laravel Module Monorepo mojo-modules provides core, groups, email, media, analytics, and memory">
+          <rect class="step-focus" x="548" y="52" width="240" height="584" rx="10"/>
+          <rect x="556" y="60" width="228" height="568" rx="10" fill="#ffffff" stroke="#16273b" stroke-width="1.4"/>
+          <text x="572" y="88" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9" font-weight="600" letter-spacing="1.4">TIER 03 · MODULE SPINE</text>
+          <text x="572" y="112" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="600">Mojo-Solo/mojo-modules</text>
+          <text x="572" y="130" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="10">main@8eb8451 · DEC D1–D52</text>
+
+          <rect x="572" y="148" width="196" height="68" rx="6" fill="#faf7f2" stroke="#16273b"/>
+          <text x="584" y="170" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">modules/core</text>
+          <text x="584" y="188" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">Sites · BelongsToTenant · HasUuid</text>
+          <text x="584" y="204" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9">permission + activitylog</text>
+
+          <rect x="572" y="226" width="196" height="62" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="584" y="248" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">modules/groups</text>
+          <text x="584" y="266" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">People directory · CSV import</text>
+
+          <rect x="572" y="298" width="196" height="62" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="584" y="320" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">modules/email</text>
+          <text x="584" y="338" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">Campaigns · Signed unsubscribe</text>
+
+          <rect x="572" y="370" width="196" height="62" rx="6" fill="#faf7f2" stroke="#e2dcd2"/>
+          <text x="584" y="392" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">modules/media &amp; analytics</text>
+          <text x="584" y="410" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">medialibrary · event collector</text>
+
+          <rect x="572" y="442" width="196" height="84" rx="6" fill="#e3eef5" stroke="#006da4"/>
+          <text x="584" y="464" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">modules/memory (PR #78)</text>
+          <text x="584" y="482" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">Meeting decisions &amp; commitments</text>
+          <text x="584" y="498" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">Verbatim quote segments + Jev</text>
+          <text x="584" y="514" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">ReviewRecords · D53–D80</text>
+
+          <rect x="572" y="538" width="196" height="74" rx="6" fill="#f1ece4" stroke="#d9ccb6"/>
+          <text x="584" y="560" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">40-Piece Mosaic Map</text>
+          <text x="584" y="578" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">mosaic/module-map@9949a97</text>
+          <text x="584" y="594" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">P1–P40 reconciled</text>
+        </g>
+
+        <!-- Tier 4: Domain & Intelligence Packages -->
+        <g data-motion-item data-step="4" aria-label="Step 4: Domain packages including conditional-interaction v0.1.0, mojojev PR 33, laravel-mosaic packages, and laravel-r2a packages">
+          <rect class="step-focus" x="812" y="52" width="224" height="584" rx="10"/>
+          <rect x="820" y="60" width="212" height="568" rx="10" fill="#e3eef5" stroke="#006da4" stroke-width="1.5"/>
+          <text x="836" y="88" fill="#006da4" font-family="'Geist Mono', monospace" font-size="9" font-weight="600" letter-spacing="1.4">TIER 04 · DOMAIN PACKAGES</text>
+          <text x="836" y="112" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="600">Composer Packages</text>
+          <text x="836" y="130" fill="#006da4" font-family="'Geist Mono', monospace" font-size="10">Shipped &amp; Versioned</text>
+
+          <rect x="836" y="148" width="180" height="78" rx="6" fill="#ffffff" stroke="#006da4" stroke-width="1.4"/>
+          <text x="848" y="170" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">conditional-interaction</text>
+          <text x="848" y="188" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">v0.1.0 · 352dff9</text>
+          <text x="848" y="204" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">✓ 98 PHP + 17 Py tests</text>
+
+          <rect x="836" y="236" width="180" height="78" rx="6" fill="#ffffff" stroke="#006da4" stroke-width="1.4"/>
+          <text x="848" y="258" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">mojojev + jev-php-sdk</text>
+          <text x="848" y="276" fill="#16273b" font-family="'Geist Mono', monospace" font-size="9">PR #33 Merged · 4a74575</text>
+          <text x="848" y="292" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">✓ 330/330 PHPUnit pass</text>
+
+          <rect x="836" y="324" width="180" height="140" rx="6" fill="#ffffff" stroke="#16273b"/>
+          <text x="848" y="346" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">laravel-mosaic-*</text>
+          <text x="848" y="366" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• mosaic-tasks (owed/road)</text>
+          <text x="848" y="382" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• mosaic-rounds (phone/host)</text>
+          <text x="848" y="398" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• mosaic-brief (catch-up)</text>
+          <text x="848" y="414" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• mosaic-pages (blocks/mojo)</text>
+          <text x="848" y="430" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• mosaic-reveal (decisions)</text>
+          <text x="848" y="446" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• mosaic-now (focus queue)</text>
+
+          <rect x="836" y="476" width="180" height="136" rx="6" fill="#ffffff" stroke="#16273b"/>
+          <text x="848" y="498" fill="#16273b" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" font-weight="600">laravel-r2a-*</text>
+          <text x="848" y="518" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• r2a-onboarding (handoffs)</text>
+          <text x="848" y="534" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• r2a-playbooks (menus)</text>
+          <text x="848" y="550" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">• r2a-pricing-floor (6→1)</text>
+          <text x="848" y="576" fill="#2e7d4f" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">✓ Mounted in host app</text>
+        </g>
+
+        <!-- Tier 5: Host App + Ian's MojoLife CoThinker Hub -->
+        <g data-motion-item data-step="5" aria-label="Step 5: Governed Host Applications mojomosaic-app and mosaic-on-modules skinned with Ian's 7 MojoLife CoThinker Hub screens">
+          <rect class="step-focus" x="1060" y="52" width="200" height="584" rx="10"/>
+          <rect x="1068" y="60" width="184" height="568" rx="10" fill="#16273b" stroke="#16273b"/>
+          <text x="1084" y="88" fill="#5fcbec" font-family="'Geist Mono', monospace" font-size="9" font-weight="600" letter-spacing="1.4">TIER 05 · LIVE HOST</text>
+          <text x="1084" y="112" fill="#f3eee4" font-family="'Plus Jakarta Sans', sans-serif" font-size="15" font-weight="600">MojoLife Host</text>
+          <text x="1084" y="130" fill="#b6b0a4" font-family="'Geist Mono', monospace" font-size="9">PR #90 + PR #91 Live</text>
+
+          <rect x="1084" y="148" width="152" height="54" rx="6" fill="#faf7f2"/>
+          <text x="1096" y="170" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">01 · Today (Morphs)</text>
+          <text x="1096" y="188" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">screen-0 · /today</text>
+
+          <rect x="1084" y="210" width="152" height="54" rx="6" fill="#faf7f2"/>
+          <text x="1096" y="232" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">02 · Phone Voice</text>
+          <text x="1096" y="250" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">screen-1 · /phone</text>
+
+          <rect x="1084" y="272" width="152" height="54" rx="6" fill="#faf7f2"/>
+          <text x="1096" y="294" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">03 · Client Room</text>
+          <text x="1096" y="312" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">screen-2 · /client-room</text>
+
+          <rect x="1084" y="334" width="152" height="54" rx="6" fill="#faf7f2"/>
+          <text x="1096" y="356" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">04 · Inbox Envelope</text>
+          <text x="1096" y="374" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">screen-3 · /inbox</text>
+
+          <rect x="1084" y="396" width="152" height="54" rx="6" fill="#faf7f2"/>
+          <text x="1096" y="418" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">05 · Tasks Kanban</text>
+          <text x="1096" y="436" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">screen-4 · /tasks</text>
+
+          <rect x="1084" y="458" width="152" height="54" rx="6" fill="#faf7f2"/>
+          <text x="1096" y="480" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">06 · Docs Folders</text>
+          <text x="1096" y="498" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">screen-5 · /docs</text>
+
+          <rect x="1084" y="520" width="152" height="54" rx="6" fill="#faf7f2"/>
+          <text x="1096" y="542" fill="#006da4" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600">07 · People &amp; Mojo</text>
+          <text x="1096" y="560" fill="#5c6672" font-family="'Geist Mono', monospace" font-size="9">screen-6 · /people</text>
+
+          <text x="1160" y="604" text-anchor="middle" fill="#5fcbec" font-family="'Geist Mono', monospace" font-size="9" font-weight="600">:8018 · :8019 · :8020</text>
+        </g>
+      </svg>
+    </div>
+
+    <div data-motion-controls role="group" aria-label="Cherry-pick pipeline playback controls">
+      <button type="button" data-motion-action="prev">Previous</button>
+      <button type="button" data-motion-action="play" aria-pressed="false">Play</button>
+      <button type="button" data-motion-action="pause" aria-pressed="true">Pause</button>
+      <button type="button" data-motion-action="next">Next</button>
+      <button type="button" data-motion-action="replay">Replay</button>
+      <span class="keyboard-help">←/→ step · Space play/pause · R replay · Home/End jump</span>
+      <span data-motion-status-visible aria-hidden="true">Step <span data-motion-step-label>5</span> of 5</span>
+    </div>
+    <span data-motion-status role="status" aria-live="polite" aria-atomic="true">Static frame · all 5 consolidation tiers visible</span>
+    <noscript><p>Animation controls require JavaScript. The complete 5-tier cherry-pick consolidation pipeline is shown above.</p></noscript>
+  </main>
+  <script data-diagram-controls>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const staticOverride = params.get('motion') === 'static' || document.documentElement.dataset.motion === 'static';
+      const requestedStep = params.get('step');
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+      document.fonts.ready.then(() => { document.documentElement.dataset.fontsReady = 'true'; });
+
+      document.querySelectorAll('[data-motion-root]').forEach((root) => {
+        const count = Number(root.dataset.stepCount);
+        const hold = parseFloat(getComputedStyle(root).getPropertyValue('--motion-hold')) || 720;
+        const parsedStep = requestedStep !== null && /^\d+$/.test(requestedStep) ? Number(requestedStep) : null;
+        const exactStep = params.get('motion') === 'step' && Number.isSafeInteger(parsedStep) && parsedStep >= 0 && parsedStep <= count ? parsedStep : null;
+        const items = [...root.querySelectorAll('[data-motion-item]')];
+        const labels = Array.from({ length: count + 1 }, (_, index) => index === 0
+          ? 'Ready'
+          : items.filter((item) => !item.hasAttribute('data-motion-decorative') && Number(item.dataset.step) === index)
+              .map((item) => item.getAttribute('aria-label')).join('; '));
+        const controls = root.querySelector('[data-motion-controls]');
+        const status = root.querySelector('[data-motion-status]');
+        const visibleStep = root.querySelector('[data-motion-step-label]');
+        let step = count;
+        let timer = 0;
+        let playing = false;
+        let stepBeforeReduce = 0;
+        let resumeAfterReduce = root.dataset.motionMode === 'reveal';
+
+        const buttons = (action) => controls.querySelector(`[data-motion-action="${action}"]`);
+        const clearClock = () => { window.clearTimeout(timer); timer = 0; };
+        const announce = () => { status.textContent = `Step ${step} of ${count}: ${labels[step] || 'Complete'}`; };
+        const setControlsAvailable = (available) => {
+          controls.hidden = !available;
+          controls.setAttribute('aria-hidden', String(!available));
+          controls.dataset.playbackDisabled = String(!available);
+          controls.querySelectorAll('button').forEach((control) => { control.disabled = !available; });
+        };
+
+        function render(next, userInitiated = false) {
+          step = Math.max(0, Math.min(count, next));
+          root.dataset.stepCurrent = String(step);
+          root.dataset.frame = step === count ? 'end' : step === 0 ? 'start' : 'step';
+          items.forEach((item) => {
+            const itemStep = Number(item.dataset.step);
+            item.classList.toggle('is-visible', itemStep <= step);
+            item.classList.toggle('is-current', itemStep === step);
+          });
+          if (visibleStep) visibleStep.textContent = String(step);
+          const unavailable = controls.dataset.playbackDisabled === 'true';
+          buttons('prev').disabled = unavailable || step === 0;
+          buttons('next').disabled = unavailable || step === count;
+          if (userInitiated) announce();
+        }
+
+        function pause(userInitiated = false) {
+          clearClock();
+          playing = false;
+          root.classList.remove('is-playing');
+          buttons('play').setAttribute('aria-pressed', 'false');
+          buttons('pause').setAttribute('aria-pressed', 'true');
+          if (userInitiated) status.textContent = `Paused at step ${step} of ${count}`;
+        }
+
+        function finish() {
+          pause(false);
+          root.dataset.frame = 'end';
+          status.textContent = `Complete · step ${count} of ${count}`;
+        }
+
+        function tick() {
+          if (!playing) return;
+          if (step >= count) { finish(); return; }
+          render(step + 1, false);
+          if (step >= count) { finish(); return; }
+          timer = window.setTimeout(tick, hold);
+        }
+
+        function play(fromStart = false, userInitiated = false) {
+          clearClock();
+          if (fromStart || step >= count) render(0, userInitiated);
+          playing = true;
+          root.classList.add('is-playing');
+          buttons('play').setAttribute('aria-pressed', 'true');
+          buttons('pause').setAttribute('aria-pressed', 'false');
+          timer = window.setTimeout(tick, hold);
+        }
+
+        controls.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-motion-action]');
+          if (!button) return;
+          const action = button.dataset.motionAction;
+          if (action === 'play') play(false, true);
+          if (action === 'pause') pause(true);
+          if (action === 'replay') play(true, true);
+          if (action === 'prev') { pause(false); render(step - 1, true); }
+          if (action === 'next') { pause(false); render(step + 1, true); }
+        });
+
+        root.addEventListener('keydown', (event) => {
+          if (event.target.matches('input, textarea, select, a[href]')) return;
+          const keys = { ArrowLeft: step - 1, ArrowRight: step + 1, Home: 0, End: count };
+          if (event.code === 'Space' && !event.target.closest('button')) {
+            event.preventDefault();
+            playing ? pause(true) : play(false, true);
+            return;
+          }
+          if (!event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === 'r') {
+            event.preventDefault();
+            play(true, true);
+            return;
+          }
+          if (!(event.key in keys)) return;
+          event.preventDefault();
+          pause(false);
+          render(keys[event.key], true);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden' && playing) pause(false);
+        });
+        reduce.addEventListener('change', (event) => {
+          if (event.matches && root.dataset.motionState !== 'reduced') {
+            stepBeforeReduce = step;
+            resumeAfterReduce = playing;
+          }
+          pause(false);
+          if (event.matches) {
+            setControlsAvailable(false);
+            render(count, false);
+            root.dataset.frame = 'static';
+            root.dataset.motionState = 'reduced';
+            status.textContent = 'Reduced motion · complete static frame · playback controls unavailable';
+          } else if (staticOverride || root.dataset.motionMode === 'none') {
+            setControlsAvailable(false);
+            render(count, false);
+            root.dataset.frame = 'static';
+            root.dataset.motionState = 'static';
+            status.textContent = 'Static frame · complete diagram · playback controls unavailable';
+          } else {
+            delete root.dataset.motionState;
+            if (exactStep !== null) {
+              setControlsAvailable(false);
+              render(exactStep, false);
+              root.dataset.frame = 'step';
+              root.dataset.motionState = 'test';
+              status.textContent = `Test frame · step ${step} of ${count} · playback controls unavailable`;
+            } else {
+              setControlsAvailable(true);
+              render(stepBeforeReduce, false);
+              status.textContent = `Ready · step ${step} of ${count}`;
+              if (resumeAfterReduce && root.dataset.motionMode === 'reveal') {
+                play(false, false);
+              }
+            }
+            resumeAfterReduce = false;
+          }
+        });
+
+        if (staticOverride) {
+          document.documentElement.dataset.motion = 'static';
+          pause(false);
+          setControlsAvailable(false);
+          render(count, false);
+          root.dataset.frame = 'static';
+          root.dataset.motionState = 'static';
+          status.textContent = 'Static frame · complete diagram · playback controls unavailable';
+        } else if (reduce.matches || root.dataset.motionMode === 'none') {
+          pause(false);
+          setControlsAvailable(false);
+          render(count, false);
+          root.dataset.frame = 'static';
+          root.dataset.motionState = reduce.matches ? 'reduced' : 'static';
+          status.textContent = reduce.matches
+            ? 'Reduced motion · complete static frame · playback controls unavailable'
+            : 'Static frame · complete diagram · playback controls unavailable';
+        } else if (exactStep !== null) {
+          document.documentElement.dataset.motion = 'step';
+          pause(false);
+          setControlsAvailable(false);
+          render(exactStep, false);
+          root.dataset.frame = 'step';
+          root.dataset.motionState = 'test';
+          status.textContent = `Test frame · step ${step} of ${count} · playback controls unavailable`;
+        } else if (root.dataset.motionMode === 'reveal') {
+          setControlsAvailable(true);
+          render(0, false);
+          play(false, false);
+        } else {
+          pause(false);
+          setControlsAvailable(true);
+          render(0, false);
+          status.textContent = `Ready · step 0 of ${count}`;
+        }
+        root.classList.add('motion-ready');
+      });
+    })();
+  </script>
+</body>
+</html>

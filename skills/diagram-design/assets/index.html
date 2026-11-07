@@ -180,6 +180,14 @@
           >
         </h1>
         <div style="display: flex; gap: 0.5rem">
+          <a
+            class="open-raw"
+            href="mojolife-diagrams-hub.html"
+            target="_blank"
+            rel="noopener"
+            style="border-color: #006da4; color: #006da4; font-weight: 600"
+            >mojolife pipeline hub ↗</a
+          >
           <a class="open-raw" href="icons.html" target="_blank" rel="noopener"
             >icon library ↗</a
           >
@@ -309,6 +317,21 @@
         <button class="tab new" data-type="paved-road-animated" data-single>
           <span class="eyebrow">41</span>Secure paved road · animated
         </button>
+        <button class="tab new" data-type="mojolife-01" data-file="mojolife-01-information-flow.html" data-single>
+          <span class="eyebrow">42</span>MojoLife · Info Flow
+        </button>
+        <button class="tab new" data-type="mojolife-02" data-file="mojolife-02-conditional-gate-trace.html" data-single>
+          <span class="eyebrow">43</span>MojoLife · Gate Trace
+        </button>
+        <button class="tab new" data-type="mojolife-03" data-file="mojolife-03-cherry-pick-medallion.html" data-single>
+          <span class="eyebrow">44</span>MojoLife · Cherry-Pick
+        </button>
+        <button class="tab new" data-type="mojolife-04" data-file="mojolife-04-sequence-lifecycle.html" data-single>
+          <span class="eyebrow">45</span>MojoLife · Wire Sequence
+        </button>
+        <button class="tab new" data-type="mojolife-05" data-file="mojolife-05-screen-state-map.html" data-single>
+          <span class="eyebrow">46</span>MojoLife · 7-Screen Graph
+        </button>
       </div>
 
       <div
@@ -357,7 +380,8 @@
             tab.tabIndex = active ? 0 : -1;
           });
         }
-        const src = `example-${state.type}${state.variant}.html`;
+        const customFile = activeType && activeType.dataset.file;
+        const src = customFile || `example-${state.type}${state.variant}.html`;
         iframe.src = src;
         openRaw.href = src;
         const selectedTabs = document.querySelectorAll('[role="radio"][aria-checked="true"]');
